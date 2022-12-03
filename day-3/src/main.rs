@@ -159,9 +159,8 @@ mod test {
     #[test]
     fn test_part_2() {
         let input = include_str!("../input.txt");
-        let boxes = RuckSackReorganisation::parse_input(input)
-            .expect("input should be parsed");
-        
+        let boxes = RuckSackReorganisation::parse_input(input).expect("input should be parsed");
+
         assert_matches!(RuckSackReorganisation::part_2(boxes.as_ref()), Ok(2508));
     }
 }
