@@ -7,6 +7,7 @@ struct Elf {
     calories: i32,
 }
 
+/// Calories carried by elf with the most calories
 fn part_1(elves: &mut Vec<Elf>) {
     elves.sort_by(|a, b| b.calories.cmp(&a.calories));
     println!(
@@ -15,6 +16,7 @@ fn part_1(elves: &mut Vec<Elf>) {
     );
 }
 
+/// Calories carries by 3 elves with the most calories
 fn part_2(elves: &mut Vec<Elf>) {
     elves.sort_by(|a, b| b.calories.cmp(&a.calories));
     println!(

@@ -13,7 +13,7 @@ enum Hand {
 enum Outcome {
     Win,
     Draw,
-    Lose
+    Lose,
 }
 
 impl From<char> for Outcome {
@@ -22,7 +22,7 @@ impl From<char> for Outcome {
             'X' => Outcome::Lose,
             'Y' => Outcome::Draw,
             'Z' => Outcome::Win,
-            _ => panic!("unexpcted outcome: {c}")
+            _ => panic!("unexpcted outcome: {c}"),
         }
     }
 }
@@ -33,7 +33,7 @@ impl From<char> for Hand {
             'A' | 'X' => Hand::Rock,
             'B' | 'Y' => Hand::Paper,
             'C' | 'Z' => Hand::Scissors,
-            _ => panic!("unexpected hand: {c}")
+            _ => panic!("unexpected hand: {c}"),
         }
     }
 }
@@ -114,7 +114,10 @@ fn main() -> std::io::Result<()> {
             .iter()
             .map(|(theirs, ours)| Round(Hand::from(*theirs), Hand::from(*ours))),
     );
-    println!("total score, assuming second token is our hand: {}", score_part_1);
+    println!(
+        "total score, assuming second token is our hand: {}",
+        score_part_1
+    );
 
     // part 2 tells us `t1 t2` -> `their_hand, desired_outcome`
     let score_part_2 = total_score_for_second_player(rounds.iter().map(|(theirs, outcome)| {
@@ -132,7 +135,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-// Compute total score 
+// Compute total score
 fn total_score_for_second_player<T>(rounds: T) -> i32
 where
     T: Iterator<Item = Round>,
