@@ -10,8 +10,54 @@ enum Hand {
     Scissors,
 }
 
+enum Outcome {
+    Win,
+    Draw,
+    Lose
+}
+
+impl From<char> for Outcome {
+    fn from(c: char) -> Outcome {
+        match c {
+            'X' => Outcome::Lose,
+            'Y' => Outcome::Draw,
+            'Z' => Outcome::Win,
+            _ => panic!("unexpcted outcome: {c}")
+        }
+    }
+}
+
+impl From<char> for Hand {
+    fn from(c: char) -> Self {
+        match c {
+            'A' | 'X' => Hand::Rock,
+            'B' | 'Y' => Hand::Paper,
+            'C' | 'Z' => Hand::Scissors,
+            _ => panic!("unexpected hand: {c}")
+        }
+    }
+}
+
+impl From<(Outcome, Hand)> for Hand {
+    fn from((outcome, other_hand): (Outcome, Hand)) -> Self {
+        match outcome {
+            Outcome::Win => other_hand.loses_against(),
+            Outcome::Draw => other_hand,
+            Outcome::Lose => other_hand.wins_against(),
+        }
+    }
+}
+
 impl Hand {
-    fn aggressor(&self) -> Hand {
+    fn intrinsic_score(&self) -> i32 {
+        match self {
+            Hand::Rock => 1,
+            Hand::Paper => 2,
+            Hand::Scissors => 3,
+        }
+    }
+
+    fn loses_against(&self) -> Hand {
         match self {
             Hand::Rock => Hand::Paper,
             Hand::Paper => Hand::Scissors,
@@ -21,7 +67,7 @@ impl Hand {
 
     // surely theirs a more elegant (but at the same time efficient) way to
     // represent this transitive relationship?
-    fn victim(&self) -> Hand {
+    fn wins_against(&self) -> Hand {
         match self {
             Hand::Rock => Hand::Scissors,
             Hand::Scissors => Hand::Paper,
@@ -30,48 +76,17 @@ impl Hand {
     }
 
     fn score(&self, other_hand: Hand) -> i32 {
-        use Hand::*;
-
-        let intrinsic_score = match self {
-            Rock => 1,
-            Paper => 2,
-            Scissors => 3,
-        };
-
         let clash_score = match other_hand {
             ye if &ye == self => 3,
-            agg if agg == self.aggressor() => 0,
+            agg if agg == self.loses_against() => 0,
             _ => 6,
         };
 
-        clash_score + intrinsic_score
+        clash_score + self.intrinsic_score()
     }
 }
 
-fn parse_token<S>(token: S) -> Hand
-where
-    S: AsRef<str>,
-{
-    match token.as_ref() {
-        "A" | "X" => Hand::Rock,
-        "B" | "Y" => Hand::Paper,
-        "C" | "Z" => Hand::Scissors,
-        token => panic!("unexpected token: {}", token),
-    }
-}
-
-fn parse_strategy<S>(token: S, theirs: Hand) -> Hand
-where
-    S: AsRef<str>,
-{
-    match token.as_ref() {
-        "X" => theirs.victim(),
-        "Y" => theirs,
-        "Z" => theirs.aggressor(),
-        token => panic!("unexpected token: {}", token),
-    }
-}
-
+/// round represents a RPS round
 struct Round(Hand, Hand);
 
 fn main() -> std::io::Result<()> {
@@ -80,43 +95,45 @@ fn main() -> std::io::Result<()> {
         BufReader::new(File::open(name)?)
     };
 
-    // parse `k v` pairs from file
-    let rounds: Vec<(String, String)> = file
+    // parse `t1 t2` pairs from file
+    let rounds: Vec<(char, char)> = file
         .lines()
         .flatten()
         .map(|line| {
-            let tokens = line.split(" ").collect::<Vec<_>>();
-            assert!(
-                tokens.len() == 2,
-                "unexpected input format; line = {}",
-                line
-            );
-
-            (tokens[0].to_owned(), tokens[1].to_owned())
+            let mut chars = line.chars();
+            let (Some(t1), Some(' '), Some(t2), None) = (chars.next(), chars.next(), chars.next(), chars.next()) else {
+                panic!("expected round fmt: <hand><spc><hand>, got {}", line);
+            };
+            (t2, t1)
         })
         .collect();
 
-    let score_part_1 = total_score(
+    // part 1 tells us `t1 t2` -> `their_hand, our_hand`
+    let score_part_1 = total_score_for_second_player(
         rounds
             .iter()
-            .map(|(theirs, ours)| Round(parse_token(theirs), parse_token(ours))),
+            .map(|(theirs, ours)| Round(Hand::from(*theirs), Hand::from(*ours))),
     );
-    println!("total score: {}", score_part_1);
+    println!("total score, assuming second token is our hand: {}", score_part_1);
 
-    let score_part_2 = total_score(rounds.iter().map(|(theirs, outcome)| {
-        let theirs = parse_token(theirs);
-        let ours = parse_strategy(outcome, theirs);
+    // part 2 tells us `t1 t2` -> `their_hand, desired_outcome`
+    let score_part_2 = total_score_for_second_player(rounds.iter().map(|(theirs, outcome)| {
+        let theirs = Hand::from(*theirs);
+        let outcome = Outcome::from(*outcome);
+        let ours = Hand::from((outcome, theirs));
+
         Round(theirs, ours)
     }));
     println!(
-        "total score with outcome-based interpretation = {}",
+        "total score, knowing second token is outcome: {}",
         score_part_2
     );
 
     Ok(())
 }
 
-fn total_score<T>(rounds: T) -> i32
+// Compute total score 
+fn total_score_for_second_player<T>(rounds: T) -> i32
 where
     T: Iterator<Item = Round>,
 {
