@@ -55,14 +55,12 @@ impl RuckSackReorganisation {
 
     /// calculate sum of priorities of the type repeated between
     pub fn part_2(boxes: &[Box]) -> Result<i32, Report> {
-        println!("total boxes: {}", boxes.len());
         boxes
             .iter()
             .step_by(3)
             .zip(boxes.iter().skip(1).step_by(3))
             .zip(boxes.iter().skip(2).step_by(3))
             .try_fold(0, |acc, ((a, b), c)| {
-                println!("folding some group");
                 // To get around the fact that I don't want to refactor my modelling of the data, we
                 // clone the original first halves of the containers so we can "extend" them
                 let (mut x, mut y, mut z) = (a.0.clone(), b.0.clone(), c.0.clone());
