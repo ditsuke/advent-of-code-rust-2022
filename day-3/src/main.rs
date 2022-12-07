@@ -10,18 +10,6 @@ use std::collections::HashMap;
 // NOTE: WIP
 // I'll need some time to refactor all solutions to impl AOCSolution
 // This will also open doors for a more integrated solution-runner.
-mod commons {
-    pub trait AOCSolution {
-        const YEAR: &'static str;
-        const DAY: i8;
-
-        type Error;
-        type DataModel;
-
-        fn parse_input(input: &str) -> Result<Self::DataModel, Self::Error>;
-        fn solve(input: &str) -> Result<(), Self::Error>;
-    }
-}
 
 struct RuckSackReorganisation();
 
@@ -123,13 +111,12 @@ impl AOCSolution for RuckSackReorganisation {
         Ok(parsed)
     }
 
-    fn solve(input: &str) -> Result<(), Self::Error> {
-        let boxes: Vec<Box> = Self::parse_input(input)?;
+    fn solve(parsed_input: Self::DataModel) -> Result<(), Self::Error> {
+        let part_1 = Self::part_1(&parsed_input.as_ref())?;
 
-        let part_1 = Self::part_1(boxes.as_ref())?;
         println!("total value of repeat types: {}", part_1);
 
-        let part_2 = Self::part_2(boxes.as_ref())?;
+        let part_2 = Self::part_2(&parsed_input.as_ref())?;
         println!(
             "total value of shared types between groups of 3: {}",
             part_2
@@ -168,7 +155,9 @@ fn main() -> Result<(), Report> {
 
     let input = include_str!("../input.txt");
 
-    RuckSackReorganisation::solve(input)?;
+    let parsed_input = RuckSackReorganisation::parse_input(input)?;
+
+    RuckSackReorganisation::solve(parsed_input)?;
 
     Ok(())
 }

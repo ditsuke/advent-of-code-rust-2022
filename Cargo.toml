@@ -1,5 +1,5 @@
 [workspace]
-members = ["day-1", "day-2", "day-3"]
+members = ["commons", "day-1", "day-2", "day-3"]
 
 [workspace.dependencies]
 color-eyre = "0.6.2"

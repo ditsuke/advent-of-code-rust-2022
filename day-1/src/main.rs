@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use commons::AOCSolution;
 
 #[derive(Default)]
 struct Elf {
@@ -8,32 +7,20 @@ struct Elf {
 }
 
 /// Calories carried by elf with the most calories
-fn part_1(elves: &mut Vec<Elf>) {
-    elves.sort_by(|a, b| b.calories.cmp(&a.calories));
-    println!(
-        "Elf {} has most calories: {}",
-        elves[0].index, elves[0].calories
-    );
-}
+struct Calories {}
 
-/// Calories carries by 3 elves with the most calories
-fn part_2(elves: &mut Vec<Elf>) {
-    elves.sort_by(|a, b| b.calories.cmp(&a.calories));
-    println!(
-        "total of top 3: {}",
-        elves[0].calories + elves[1].calories + elves[2].calories
-    );
-}
+impl AOCSolution for Calories {
+    const YEAR: &'static str = "2022";
 
-fn main() -> std::io::Result<()> {
-    let file = {
-        let name = std::env::args().nth(1).expect("no file name passed");
-        BufReader::new(File::open(name)?)
-    };
+    const DAY: i8 = 1;
 
-    let (_current_elf, mut elves) =
-        file.lines()
-            .flatten()
+    type Error = std::io::Error;
+
+    type DataModel = Vec<Elf>;
+
+    fn parse_input(input: &str) -> Result<Self::DataModel, Self::Error> {
+        let (_, elves) = input
+            .lines()
             .fold((Elf::default(), Vec::<Elf>::new()), |acc, line| {
                 if line.is_empty() {
                     let next_elf = Elf {
@@ -58,9 +45,23 @@ fn main() -> std::io::Result<()> {
                     acc.1,
                 )
             });
+        Ok(elves)
+    }
 
-    part_1(&mut elves);
-    part_2(&mut elves);
+    fn solve(mut elves: Self::DataModel) -> Result<(), Self::Error> {
+        elves.sort_by(|a, b| b.calories.cmp(&a.calories));
+        println!(
+            "Elf {} has most calories: {}",
+            elves[0].index, elves[0].calories
+        );
+        println!(
+            "total of top 3: {}",
+            elves[0].calories + elves[1].calories + elves[2].calories
+        );
+        Ok(())
+    }
+}
 
+fn main() -> std::io::Result<()> {
     Ok(())
 }

@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
+use commons::AOCSolution;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 enum Hand {
@@ -89,16 +86,20 @@ impl Hand {
 /// round represents a RPS round
 struct Round(Hand, Hand);
 
-fn main() -> std::io::Result<()> {
-    let file = {
-        let name = std::env::args().nth(1).expect("no file name passed");
-        BufReader::new(File::open(name)?)
-    };
+struct RockPaperScissors {}
 
-    // parse `t1 t2` pairs from file
-    let rounds: Vec<(char, char)> = file
+impl AOCSolution for RockPaperScissors {
+    const YEAR: &'static str = "2022";
+
+    const DAY: i8 = 2;
+
+    type Error = std::io::Error;
+
+    type DataModel = Vec<(char, char)>;
+
+    fn parse_input(input: &str) -> Result<Self::DataModel, Self::Error> {
+        let rounds = input
         .lines()
-        .flatten()
         .map(|line| {
             let mut chars = line.chars();
             let (Some(t1), Some(' '), Some(t2), None) = (chars.next(), chars.next(), chars.next(), chars.next()) else {
@@ -107,32 +108,35 @@ fn main() -> std::io::Result<()> {
             (t2, t1)
         })
         .collect();
+        Ok(rounds)
+    }
 
-    // part 1 tells us `t1 t2` -> `their_hand, our_hand`
-    let score_part_1 = total_score_for_second_player(
-        rounds
-            .iter()
-            .map(|(theirs, ours)| Round(Hand::from(*theirs), Hand::from(*ours))),
-    );
-    println!(
-        "total score, assuming second token is our hand: {}",
-        score_part_1
-    );
+    fn solve(parsed_input: Self::DataModel) -> Result<(), Self::Error> {
+        // part 1 tells us `t1 t2` -> `their_hand, our_hand`
+        let score_part_1 = total_score_for_second_player(
+            parsed_input
+                .iter()
+                .map(|(theirs, ours)| Round(Hand::from(*theirs), Hand::from(*ours))),
+        );
+        println!(
+            "total score, assuming second token is our hand: {}",
+            score_part_1
+        );
 
-    // part 2 tells us `t1 t2` -> `their_hand, desired_outcome`
-    let score_part_2 = total_score_for_second_player(rounds.iter().map(|(theirs, outcome)| {
-        let theirs = Hand::from(*theirs);
-        let outcome = Outcome::from(*outcome);
-        let ours = Hand::from((outcome, theirs));
+        // part 2 tells us `t1 t2` -> `their_hand, desired_outcome`
+        let score_part_2 = total_score_for_second_player(parsed_input.iter().map(|(theirs, outcome)| {
+            let theirs = Hand::from(*theirs);
+            let outcome = Outcome::from(*outcome);
+            let ours = Hand::from((outcome, theirs));
 
-        Round(theirs, ours)
-    }));
-    println!(
-        "total score, knowing second token is outcome: {}",
-        score_part_2
-    );
-
+            Round(theirs, ours)
+        }));
+        println!(
+            "total score, knowing second token is outcome: {}",
+            score_part_2
+        );
     Ok(())
+    }
 }
 
 // Compute total score
@@ -144,4 +148,8 @@ where
         .map(|round| round.1.score(round.0))
         .reduce(|acc, s| acc + s)
         .expect("there must be at least one round to compute a score")
+}
+
+fn main() {
+
 }

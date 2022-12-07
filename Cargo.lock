@@ -72,18 +72,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "commons"
+version = "0.1.0"
+
+[[package]]
 name = "day-1"
 version = "0.1.0"
+dependencies = [
+ "commons",
+]
 
 [[package]]
 name = "day-2"
 version = "0.1.0"
+dependencies = [
+ "commons",
+]
 
 [[package]]
 name = "day-3"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "commons",
  "itertools",
 ]
 
