@@ -13,4 +13,6 @@ cargo run --bin day-<x>
 - [x] Day 1: [Calorie Counting](https://adventofcode.com/2022/day/1)
 - [x] Day 2: [Rock Paper Scissors](https://adventofcode.com/2022/day/2)
 - [x] Day 3: [Rucksack Reorganisation](https://adventofcode.com/2022/day/3)
-
+- [x] Day 4: [Camp Cleanup](https://adventofcode.com/2022/day/4)
+- [ ] Day 5: [Supply Stacks](https://adventofcode.com/2022/day/5)
+- [x] Day 6: [Tuning Trouble](https://adventofcode.com/2022/day/6)
